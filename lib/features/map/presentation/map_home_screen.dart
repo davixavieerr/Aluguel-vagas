@@ -1,7 +1,11 @@
+// Caminho: lib/features/map/presentation/map_home_screen.dart
+
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import '../../../../core/constants/map_style.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../shared/models/parking_spot_model.dart';
+import '../../spots/presentation/spot_details_screen.dart';
 import 'widgets/map_search_bar.dart';
 import 'widgets/map_filter_chips.dart';
 import 'widgets/spot_details_card.dart';
@@ -18,10 +22,8 @@ class _MapHomeScreenState extends State<MapHomeScreen> {
   ParkingSpot? _selectedSpot;
   String _selectedFilter = 'Todos';
 
-  // Ponto central: Av. Paulista / MASP
   static const LatLng _paulistaCenter = LatLng(-23.561414, -46.655881);
 
-  // Mock de Vagas na Região da Paulista
   final List<ParkingSpot> _mockSpots = const [
     ParkingSpot(
       id: 'sp_01',
@@ -34,7 +36,7 @@ class _MapHomeScreenState extends State<MapHomeScreen> {
       maxVehicleSize: VehicleSize.suv,
       accessMethod: AccessMethod.qrCode,
       totalSpots: 5,
-      availableSpots: 4, // Verde
+      availableSpots: 4,
       pricePerHour: 14.00,
       pricePerDay: 70.00,
       condominiumRules: 'Portaria 24h. Entrada com QR Code.',
@@ -53,7 +55,7 @@ class _MapHomeScreenState extends State<MapHomeScreen> {
       maxVehicleSize: VehicleSize.sedan,
       accessMethod: AccessMethod.conciergeList,
       totalSpots: 10,
-      availableSpots: 2, // Amarelo
+      availableSpots: 2,
       pricePerHour: 22.00,
       pricePerDay: 110.00,
       condominiumRules: 'Rotativo coberto com seguro.',
@@ -72,7 +74,7 @@ class _MapHomeScreenState extends State<MapHomeScreen> {
       maxVehicleSize: VehicleSize.compact,
       accessMethod: AccessMethod.remoteControl,
       totalSpots: 3,
-      availableSpots: 0, // Vermelho (Lotado)
+      availableSpots: 0,
       pricePerHour: 10.00,
       pricePerDay: 50.00,
       condominiumRules: 'Acesso com liberação na portaria.',
@@ -87,44 +89,48 @@ class _MapHomeScreenState extends State<MapHomeScreen> {
       case SpotAvailabilityStatus.available:
         return BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueGreen);
       case SpotAvailabilityStatus.limited:
-        return BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueYellow);
+        return BitmapDescriptor.defaultMarkerWithHue(
+            BitmapDescriptor.hueYellow);
       case SpotAvailabilityStatus.full:
         return BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRed);
     }
   }
 
   Set<Marker> _buildMarkers() {
-    return _mockSpots
-        .where((spot) {
-          if (_selectedFilter == 'Residencial') return spot.spotType == SpotType.residential;
-          if (_selectedFilter == 'Comercial') return spot.spotType == SpotType.commercial;
-          if (_selectedFilter == 'Disponíveis') return spot.availableSpots > 0;
-          return true;
-        })
-        .map((spot) {
-          return Marker(
-            markerId: MarkerId(spot.id),
-            position: LatLng(spot.latitude, spot.longitude),
-            icon: _getMarkerHue(spot.status),
-            infoWindow: InfoWindow(
-              title: spot.buildingName,
-              snippet: 'R\$ ${spot.pricePerHour.toStringAsFixed(2)}/h • ${spot.availableSpots} vagas',
+    return _mockSpots.where((spot) {
+      if (_selectedFilter == 'Residencial') {
+        return spot.spotType == SpotType.residential;
+      }
+      if (_selectedFilter == 'Comercial') {
+        return spot.spotType == SpotType.commercial;
+      }
+      if (_selectedFilter == 'Disponíveis') {
+        return spot.availableSpots > 0;
+      }
+      return true;
+    }).map((spot) {
+      return Marker(
+        markerId: MarkerId(spot.id),
+        position: LatLng(spot.latitude, spot.longitude),
+        icon: _getMarkerHue(spot.status),
+        infoWindow: InfoWindow(
+          title: spot.buildingName,
+          snippet:
+              'R\$ ${spot.pricePerHour.toStringAsFixed(2)}/h • ${spot.availableSpots} vagas',
+        ),
+        onTap: () {
+          setState(() {
+            _selectedSpot = spot;
+          });
+          _mapController?.animateCamera(
+            CameraUpdate.newLatLngZoom(
+              LatLng(spot.latitude, spot.longitude),
+              16.5,
             ),
-            onTap: () {
-              setState(() {
-                _selectedSpot = spot;
-            });
-            // Centraliza e dá zoom suave na vaga selecionada
-            _mapController?.animateCamera(
-              CameraUpdate.newLatLngZoom(
-                LatLng(spot.latitude, spot.longitude),
-                16.5,
-              ),
-            );
-          },
           );
-        })
-        .toSet();
+        },
+      );
+    }).toSet();
   }
 
   void _showWaitlistDialog(ParkingSpot spot) {
@@ -132,7 +138,8 @@ class _MapHomeScreenState extends State<MapHomeScreen> {
       context: context,
       builder: (ctx) => AlertDialog(
         backgroundColor: AppColors.cardSurface,
-        title: const Text('Entrar na Lista de Espera', style: TextStyle(color: AppColors.textPrimary)),
+        title: const Text('Entrar na Lista de Espera',
+            style: TextStyle(color: AppColors.textPrimary)),
         content: Text(
           'O ${spot.buildingName} está sem vagas no momento. Deseja receber uma notificação assim que uma vaga for liberada?',
           style: const TextStyle(color: AppColors.textSecondary),
@@ -140,10 +147,12 @@ class _MapHomeScreenState extends State<MapHomeScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('Cancelar', style: TextStyle(color: AppColors.textSecondary)),
+            child: const Text('Cancelar',
+                style: TextStyle(color: AppColors.textSecondary)),
           ),
           ElevatedButton(
-            style: ElevatedButton.styleFrom(backgroundColor: AppColors.primaryBlue),
+            style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primaryBlue),
             onPressed: () {
               Navigator.pop(ctx);
               ScaffoldMessenger.of(context).showSnackBar(
@@ -153,7 +162,8 @@ class _MapHomeScreenState extends State<MapHomeScreen> {
                 ),
               );
             },
-            child: const Text('Ativar Notificação', style: TextStyle(color: Colors.white)),
+            child: const Text('Ativar Notificação',
+                style: TextStyle(color: Colors.white)),
           ),
         ],
       ),
@@ -161,10 +171,10 @@ class _MapHomeScreenState extends State<MapHomeScreen> {
   }
 
   void _handleBooking(ParkingSpot spot) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        backgroundColor: AppColors.statusGreen,
-        content: Text('Iniciando reserva em ${spot.buildingName}...'),
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => SpotDetailsScreen(spot: spot),
       ),
     );
   }
@@ -180,13 +190,13 @@ class _MapHomeScreenState extends State<MapHomeScreen> {
               target: _paulistaCenter,
               zoom: 15.0,
             ),
+            style: MapStyle.darkMapJson,
             onMapCreated: (controller) => _mapController = controller,
             markers: _buildMarkers(),
             myLocationButtonEnabled: false,
             zoomControlsEnabled: false,
             onTap: (_) => setState(() => _selectedSpot = null),
           ),
-
           SafeArea(
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -205,7 +215,6 @@ class _MapHomeScreenState extends State<MapHomeScreen> {
               ],
             ),
           ),
-
           if (_selectedSpot != null)
             Align(
               alignment: Alignment.bottomCenter,
