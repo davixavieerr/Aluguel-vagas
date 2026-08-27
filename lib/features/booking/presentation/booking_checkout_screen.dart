@@ -17,11 +17,18 @@ class BookingCheckoutScreen extends StatefulWidget {
 }
 
 class _BookingCheckoutScreenState extends State<BookingCheckoutScreen> {
-  int _selectedHours = 2;
+  int _selectedDuration = 1; // Meses (se mensal) ou Horas (se horista)
   String _selectedPaymentMethod = 'PIX';
   bool _isProcessing = false;
 
-  double get _totalPrice => widget.spot.pricePerHour * _selectedHours;
+  bool get _isMonthly => widget.spot.pricePerMonth != null;
+
+  double get _totalPrice {
+    if (_isMonthly) {
+      return (widget.spot.pricePerMonth ?? 0.0) * _selectedDuration;
+    }
+    return (widget.spot.pricePerHour ?? 0.0) * _selectedDuration;
+  }
 
   void _confirmBooking() async {
     setState(() => _isProcessing = true);
@@ -36,7 +43,9 @@ class _BookingCheckoutScreenState extends State<BookingCheckoutScreen> {
         builder: (_) => QRCodeCheckinScreen(
           spotName: widget.spot.buildingName,
           address: widget.spot.address,
-          validUntil: DateTime.now().add(Duration(hours: _selectedHours)),
+          validUntil: _isMonthly
+              ? DateTime.now().add(Duration(days: 30 * _selectedDuration))
+              : DateTime.now().add(Duration(hours: _selectedDuration)),
           qrPayload:
               'PARK-${widget.spot.id}-${DateTime.now().millisecondsSinceEpoch}',
         ),
@@ -44,11 +53,11 @@ class _BookingCheckoutScreenState extends State<BookingCheckoutScreen> {
     );
   }
 
-  Widget _buildHourButton(int hours) {
-    final isSelected = _selectedHours == hours;
+  Widget _buildDurationButton(int value, String label) {
+    final isSelected = _selectedDuration == value;
     return Expanded(
       child: GestureDetector(
-        onTap: () => setState(() => _selectedHours = hours),
+        onTap: () => setState(() => _selectedDuration = value),
         child: Container(
           margin: const EdgeInsets.symmetric(horizontal: 4),
           padding: const EdgeInsets.symmetric(vertical: 12),
@@ -58,10 +67,11 @@ class _BookingCheckoutScreenState extends State<BookingCheckoutScreen> {
           ),
           alignment: Alignment.center,
           child: Text(
-            '$hours h',
+            label,
             style: TextStyle(
               color: isSelected ? Colors.white : AppColors.textPrimary,
               fontWeight: FontWeight.bold,
+              fontSize: 13,
             ),
           ),
         ),
@@ -75,8 +85,10 @@ class _BookingCheckoutScreenState extends State<BookingCheckoutScreen> {
       backgroundColor: AppColors.darkBackground,
       appBar: AppBar(
         backgroundColor: AppColors.cardSurface,
-        title: const Text('Resumo da Reserva',
-            style: TextStyle(color: AppColors.textPrimary)),
+        title: Text(
+          _isMonthly ? 'Contrato de Locação Mensal' : 'Resumo da Reserva',
+          style: const TextStyle(color: AppColors.textPrimary),
+        ),
       ),
       body: Padding(
         padding: const EdgeInsets.all(20),
@@ -90,6 +102,7 @@ class _BookingCheckoutScreenState extends State<BookingCheckoutScreen> {
                   fontSize: 18,
                   fontWeight: FontWeight.bold),
             ),
+            const SizedBox(height: 4),
             Text(
               widget.spot.address,
               style:
@@ -97,18 +110,27 @@ class _BookingCheckoutScreenState extends State<BookingCheckoutScreen> {
             ),
             const SizedBox(height: 24),
 
-            // Seletor de Tempo (1h, 2h, 4h, 8h)
-            const Text('Duração Estimada',
-                style: TextStyle(
-                    color: AppColors.textPrimary, fontWeight: FontWeight.bold)),
+            // Seletor de Duração (Meses para Contrato ou Horas para Rotativo)
+            Text(
+              _isMonthly ? 'Duração do Contrato' : 'Duração Estimada',
+              style: const TextStyle(
+                  color: AppColors.textPrimary, fontWeight: FontWeight.bold),
+            ),
             const SizedBox(height: 12),
             Row(
-              children: [
-                _buildHourButton(1),
-                _buildHourButton(2),
-                _buildHourButton(4),
-                _buildHourButton(8),
-              ],
+              children: _isMonthly
+                  ? [
+                      _buildDurationButton(1, '1 mês'),
+                      _buildDurationButton(3, '3 meses'),
+                      _buildDurationButton(6, '6 meses'),
+                      _buildDurationButton(12, '1 ano'),
+                    ]
+                  : [
+                      _buildDurationButton(1, '1 h'),
+                      _buildDurationButton(2, '2 h'),
+                      _buildDurationButton(4, '4 h'),
+                      _buildDurationButton(8, '8 h'),
+                    ],
             ),
             const SizedBox(height: 24),
 
@@ -117,8 +139,17 @@ class _BookingCheckoutScreenState extends State<BookingCheckoutScreen> {
                 style: TextStyle(
                     color: AppColors.textPrimary, fontWeight: FontWeight.bold)),
             const SizedBox(height: 12),
-            _buildPaymentOption('PIX', 'Aprovação Imediata', Icons.pix),
-            _buildPaymentOption('Cartão de Crédito', 'Retenção até o check-in',
+            _buildPaymentOption(
+                'PIX',
+                _isMonthly
+                    ? 'Pagamento recorrente mensal'
+                    : 'Aprovação Imediata',
+                Icons.pix),
+            _buildPaymentOption(
+                'Cartão de Crédito',
+                _isMonthly
+                    ? 'Cobrança mensal automática'
+                    : 'Retenção até o check-in',
                 Icons.credit_card),
 
             const Spacer(),
@@ -127,9 +158,11 @@ class _BookingCheckoutScreenState extends State<BookingCheckoutScreen> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text('Total:',
-                    style: TextStyle(
-                        color: AppColors.textSecondary, fontSize: 16)),
+                Text(
+                  _isMonthly ? 'Valor Total do Contrato:' : 'Total:',
+                  style: const TextStyle(
+                      color: AppColors.textSecondary, fontSize: 16),
+                ),
                 Text(
                   Formatters.formatCurrency(_totalPrice),
                   style: const TextStyle(
@@ -141,7 +174,8 @@ class _BookingCheckoutScreenState extends State<BookingCheckoutScreen> {
             ),
             const SizedBox(height: 16),
             CustomButton(
-              text: 'Confirmar e Pagar',
+              text:
+                  _isMonthly ? 'Assinar Contrato e Pagar' : 'Confirmar e Pagar',
               isLoading: _isProcessing,
               onPressed: _confirmBooking,
             ),

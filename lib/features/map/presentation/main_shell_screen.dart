@@ -5,6 +5,7 @@ import '../../../core/theme/app_colors.dart';
 import '../../auth/presentation/profile_screen.dart';
 import '../../booking/presentation/my_bookings_screen.dart';
 import '../../spots/presentation/add_spot_screen.dart';
+import '../../spots/presentation/my_spots_screen.dart';
 import '../../waitlist/presentation/my_waitlists_screen.dart';
 import 'map_home_screen.dart';
 
@@ -18,21 +19,26 @@ class MainShellScreen extends StatefulWidget {
 class _MainShellScreenState extends State<MainShellScreen> {
   int _currentIndex = 0;
 
-  final List<Widget> _screens = const [
-    MapHomeScreen(),
-    MyBookingsScreen(),
-    MyWaitlistsScreen(),
-    AddSpotScreen(),
-    ProfileScreen(),
-  ];
-
   @override
   Widget build(BuildContext context) {
+    final screens = [
+      const MapHomeScreen(),
+      const MyBookingsScreen(),
+      const MyWaitlistsScreen(),
+      AddSpotScreen(
+        onSpotAdded: () {
+          setState(() => _currentIndex = 0); // Vai para o Mapa ao publicar
+        },
+      ),
+      const MySpotsScreen(), // Minhas Vagas Anunciadas
+      const ProfileScreen(),
+    ];
+
     return Scaffold(
       backgroundColor: AppColors.darkBackground,
       body: IndexedStack(
         index: _currentIndex,
-        children: _screens,
+        children: screens,
       ),
       bottomNavigationBar: Container(
         decoration: const BoxDecoration(
@@ -45,8 +51,8 @@ class _MainShellScreenState extends State<MainShellScreen> {
           selectedItemColor: AppColors.primaryBlue,
           unselectedItemColor: AppColors.textSecondary,
           type: BottomNavigationBarType.fixed,
-          selectedFontSize: 11,
-          unselectedFontSize: 11,
+          selectedFontSize: 10,
+          unselectedFontSize: 10,
           items: const [
             BottomNavigationBarItem(
               icon: Icon(Icons.map_outlined),
@@ -67,6 +73,11 @@ class _MainShellScreenState extends State<MainShellScreen> {
               icon: Icon(Icons.add_circle_outline),
               activeIcon: Icon(Icons.add_circle),
               label: 'Anunciar',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.garage_outlined),
+              activeIcon: Icon(Icons.garage),
+              label: 'Minhas Vagas',
             ),
             BottomNavigationBarItem(
               icon: Icon(Icons.person_outline),

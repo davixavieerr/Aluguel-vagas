@@ -1,12 +1,17 @@
-// lib/shared/models/parking_spot_model.dart
+// Caminho: lib/shared/models/parking_spot_model.dart
+
 enum SpotType { residential, commercial }
+
 enum VehicleSize { compact, sedan, suv, motorcycle }
+
 enum AccessMethod { qrCode, remoteControl, conciergeList }
 
+enum RentalModality { monthlyOnly, hourlyOnly, both }
+
 enum SpotAvailabilityStatus {
-  available, // Verde (> 3 vagas)
-  limited,   // Amarelo (1 a 3 vagas)
-  full,      // Vermelho (0 vagas - aciona Waitlist)
+  available, // Verde (> 3 vagas ou vaga mensal livre)
+  limited, // Amarelo (1 a 3 vagas)
+  full, // Vermelho (0 vagas / Ocupada)
 }
 
 class ParkingSpot {
@@ -17,13 +22,15 @@ class ParkingSpot {
   final double latitude;
   final double longitude;
   final SpotType spotType;
+  final RentalModality modality; // Mensal, Horista ou Ambos
   final VehicleSize maxVehicleSize;
   final AccessMethod accessMethod;
   final int totalSpots;
   final int availableSpots;
-  final double pricePerHour;
-  final double? pricePerDay;
-  final String condominiumRules; // Ex: 'Portaria 24h. Necessário apresentar CNH.'
+  final double? pricePerHour;
+  final double? pricePerMonth; // Valor do aluguel mensal por contrato
+  final int minContractMonths; // Tempo mínimo de contrato (ex: 1, 3, 6 meses)
+  final String condominiumRules;
   final bool allowsExternalGuests;
   final double rating;
   final int totalReviews;
@@ -37,12 +44,14 @@ class ParkingSpot {
     required this.latitude,
     required this.longitude,
     required this.spotType,
+    required this.modality,
     required this.maxVehicleSize,
     required this.accessMethod,
     required this.totalSpots,
     required this.availableSpots,
-    required this.pricePerHour,
-    this.pricePerDay,
+    this.pricePerHour,
+    this.pricePerMonth,
+    this.minContractMonths = 1,
     required this.condominiumRules,
     required this.allowsExternalGuests,
     this.rating = 5.0,

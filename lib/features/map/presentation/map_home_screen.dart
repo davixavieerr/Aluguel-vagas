@@ -5,6 +5,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import '../../../../core/constants/map_style.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../shared/models/parking_spot_model.dart';
+import '../../spots/data/spots_repository.dart';
 import '../../spots/presentation/spot_details_screen.dart';
 import 'widgets/map_search_bar.dart';
 import 'widgets/map_filter_chips.dart';
@@ -24,66 +25,6 @@ class _MapHomeScreenState extends State<MapHomeScreen> {
 
   static const LatLng _paulistaCenter = LatLng(-23.561414, -46.655881);
 
-  final List<ParkingSpot> _mockSpots = const [
-    ParkingSpot(
-      id: 'sp_01',
-      hostId: 'host_01',
-      buildingName: 'Edifício Paulista Tower (Residencial)',
-      address: 'Alameda Santos, 1470 - Cerqueira César',
-      latitude: -23.563200,
-      longitude: -46.654200,
-      spotType: SpotType.residential,
-      maxVehicleSize: VehicleSize.suv,
-      accessMethod: AccessMethod.qrCode,
-      totalSpots: 5,
-      availableSpots: 4,
-      pricePerHour: 14.00,
-      pricePerDay: 70.00,
-      condominiumRules: 'Portaria 24h. Entrada com QR Code.',
-      allowsExternalGuests: true,
-      rating: 4.9,
-      totalReviews: 28,
-    ),
-    ParkingSpot(
-      id: 'sp_02',
-      hostId: 'host_02',
-      buildingName: 'Estacionamento Top Center (Comercial)',
-      address: 'Av. Paulista, 854 - Bela Vista',
-      latitude: -23.565800,
-      longitude: -46.651500,
-      spotType: SpotType.commercial,
-      maxVehicleSize: VehicleSize.sedan,
-      accessMethod: AccessMethod.conciergeList,
-      totalSpots: 10,
-      availableSpots: 2,
-      pricePerHour: 22.00,
-      pricePerDay: 110.00,
-      condominiumRules: 'Rotativo coberto com seguro.',
-      allowsExternalGuests: true,
-      rating: 4.7,
-      totalReviews: 142,
-    ),
-    ParkingSpot(
-      id: 'sp_03',
-      hostId: 'host_03',
-      buildingName: 'Condomínio Augusta Central (Residencial)',
-      address: 'Rua Augusta, 1508 - Consolação',
-      latitude: -23.555200,
-      longitude: -46.659800,
-      spotType: SpotType.residential,
-      maxVehicleSize: VehicleSize.compact,
-      accessMethod: AccessMethod.remoteControl,
-      totalSpots: 3,
-      availableSpots: 0,
-      pricePerHour: 10.00,
-      pricePerDay: 50.00,
-      condominiumRules: 'Acesso com liberação na portaria.',
-      allowsExternalGuests: true,
-      rating: 4.8,
-      totalReviews: 19,
-    ),
-  ];
-
   BitmapDescriptor _getMarkerHue(SpotAvailabilityStatus status) {
     switch (status) {
       case SpotAvailabilityStatus.available:
@@ -96,19 +37,29 @@ class _MapHomeScreenState extends State<MapHomeScreen> {
     }
   }
 
-  Set<Marker> _buildMarkers() {
-    return _mockSpots.where((spot) {
-      if (_selectedFilter == 'Residencial') {
-        return spot.spotType == SpotType.residential;
+  Set<Marker> _buildMarkers(List<ParkingSpot> spots) {
+    return spots.where((spot) {
+      if (_selectedFilter == 'Contrato Mensal') {
+        return spot.modality == RentalModality.monthlyOnly ||
+            spot.modality == RentalModality.both;
       }
-      if (_selectedFilter == 'Comercial') {
-        return spot.spotType == SpotType.commercial;
+      if (_selectedFilter == 'Por Hora') {
+        return spot.modality == RentalModality.hourlyOnly ||
+            spot.modality == RentalModality.both;
+      }
+      if (_selectedFilter == 'Residencial (P2P)') {
+        return spot.spotType == SpotType.residential;
       }
       if (_selectedFilter == 'Disponíveis') {
         return spot.availableSpots > 0;
       }
       return true;
     }).map((spot) {
+      final isMonthly = spot.pricePerMonth != null;
+      final priceSnippet = isMonthly
+          ? 'R\$ ${spot.pricePerMonth!.toStringAsFixed(0)}/mês (Contrato)'
+          : 'R\$ ${spot.pricePerHour?.toStringAsFixed(2)}/h';
+
       return Marker(
         markerId: MarkerId(spot.id),
         position: LatLng(spot.latitude, spot.longitude),
@@ -116,7 +67,7 @@ class _MapHomeScreenState extends State<MapHomeScreen> {
         infoWindow: InfoWindow(
           title: spot.buildingName,
           snippet:
-              'R\$ ${spot.pricePerHour.toStringAsFixed(2)}/h • ${spot.availableSpots} vagas',
+              '$priceSnippet • ${spot.availableSpots > 0 ? 'Livre' : 'Ocupada'}',
         ),
         onTap: () {
           setState(() {
@@ -138,10 +89,10 @@ class _MapHomeScreenState extends State<MapHomeScreen> {
       context: context,
       builder: (ctx) => AlertDialog(
         backgroundColor: AppColors.cardSurface,
-        title: const Text('Entrar na Lista de Espera',
+        title: const Text('Lista de Espera de Vaga',
             style: TextStyle(color: AppColors.textPrimary)),
         content: Text(
-          'O ${spot.buildingName} está sem vagas no momento. Deseja receber uma notificação assim que uma vaga for liberada?',
+          'A vaga no ${spot.buildingName} está ocupada. Deseja receber uma notificação assim que for desocupada?',
           style: const TextStyle(color: AppColors.textSecondary),
         ),
         actions: [
@@ -158,11 +109,12 @@ class _MapHomeScreenState extends State<MapHomeScreen> {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
                   backgroundColor: AppColors.primaryBlue,
-                  content: Text('Alerta ativado para ${spot.buildingName}!'),
+                  content:
+                      Text('Alerta de vaga ativado para ${spot.buildingName}!'),
                 ),
               );
             },
-            child: const Text('Ativar Notificação',
+            child: const Text('Ativar Alerta',
                 style: TextStyle(color: Colors.white)),
           ),
         ],
@@ -181,52 +133,67 @@ class _MapHomeScreenState extends State<MapHomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.darkBackground,
-      body: Stack(
-        children: [
-          GoogleMap(
-            initialCameraPosition: const CameraPosition(
-              target: _paulistaCenter,
-              zoom: 15.0,
-            ),
-            style: MapStyle.darkMapJson,
-            onMapCreated: (controller) => _mapController = controller,
-            markers: _buildMarkers(),
-            myLocationButtonEnabled: false,
-            zoomControlsEnabled: false,
-            onTap: (_) => setState(() => _selectedSpot = null),
-          ),
-          SafeArea(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                MapSearchBar(
-                  onTap: () {},
-                  onFilterTap: () {},
+    return ListenableBuilder(
+      listenable: SpotsRepository.instance,
+      builder: (context, _) {
+        final allSpots = SpotsRepository.instance.spots;
+
+        return Scaffold(
+          backgroundColor: AppColors.darkBackground,
+          body: Stack(
+            children: [
+              GoogleMap(
+                initialCameraPosition: const CameraPosition(
+                  target: _paulistaCenter,
+                  zoom: 14.8,
                 ),
-                const SizedBox(height: 8),
-                MapFilterChips(
-                  selectedFilter: _selectedFilter,
-                  onFilterSelected: (filter) {
-                    setState(() => _selectedFilter = filter);
-                  },
-                ),
-              ],
-            ),
-          ),
-          if (_selectedSpot != null)
-            Align(
-              alignment: Alignment.bottomCenter,
-              child: SpotDetailsCard(
-                spot: _selectedSpot!,
-                onReserve: () => _handleBooking(_selectedSpot!),
-                onWaitlist: () => _showWaitlistDialog(_selectedSpot!),
-                onClose: () => setState(() => _selectedSpot = null),
+                style: MapStyle.darkMapJson,
+                onMapCreated: (controller) => _mapController = controller,
+                markers: _buildMarkers(allSpots),
+                myLocationButtonEnabled: false,
+                zoomControlsEnabled: false,
+                onTap: (_) => setState(() => _selectedSpot = null),
               ),
-            ),
-        ],
-      ),
+              SafeArea(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    MapSearchBar(
+                      hintText: 'Buscar prédios com vagas na Paulista...',
+                      onTap: () {},
+                      onFilterTap: () {},
+                    ),
+                    const SizedBox(height: 8),
+                    MapFilterChips(
+                      selectedFilter: _selectedFilter,
+                      filters: const [
+                        'Todos',
+                        'Contrato Mensal',
+                        'Por Hora',
+                        'Residencial (P2P)',
+                        'Disponíveis'
+                      ],
+                      onFilterSelected: (filter) {
+                        setState(() => _selectedFilter = filter);
+                      },
+                    ),
+                  ],
+                ),
+              ),
+              if (_selectedSpot != null)
+                Align(
+                  alignment: Alignment.bottomCenter,
+                  child: SpotDetailsCard(
+                    spot: _selectedSpot!,
+                    onReserve: () => _handleBooking(_selectedSpot!),
+                    onWaitlist: () => _showWaitlistDialog(_selectedSpot!),
+                    onClose: () => setState(() => _selectedSpot = null),
+                  ),
+                ),
+            ],
+          ),
+        );
+      },
     );
   }
 }

@@ -30,22 +30,25 @@ class SpotDetailsScreen extends StatelessWidget {
       case AccessMethod.qrCode:
         return 'QR Code na Portaria / Cancela Automática';
       case AccessMethod.remoteControl:
-        return 'Controle Remoto entregue pelo Anfitrião';
+        return 'Controle Remoto / Tag entregue pelo Morador';
       case AccessMethod.conciergeList:
-        return 'Identificação prévia com CNH na Portaria';
+        return 'Cadastro oficial na Administração do Prédio';
     }
   }
 
   @override
   Widget build(BuildContext context) {
     final isFull = spot.status == SpotAvailabilityStatus.full;
+    final isMonthly = spot.pricePerMonth != null;
 
     return Scaffold(
       backgroundColor: AppColors.darkBackground,
       appBar: AppBar(
         backgroundColor: AppColors.cardSurface,
-        title: const Text('Detalhes da Vaga',
-            style: TextStyle(color: AppColors.textPrimary)),
+        title: Text(
+          isMonthly ? 'Contrato de Vaga Mensal' : 'Detalhes da Vaga',
+          style: const TextStyle(color: AppColors.textPrimary),
+        ),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
           onPressed: () => Navigator.pop(context),
@@ -73,17 +76,22 @@ class SpotDetailsScreen extends StatelessWidget {
                         padding: const EdgeInsets.symmetric(
                             horizontal: 10, vertical: 4),
                         decoration: BoxDecoration(
-                          color: AppColors.primaryBlue.withValues(alpha: 0.2),
+                          color: isMonthly
+                              ? AppColors.primaryBlue.withValues(alpha: 0.2)
+                              : Colors.orange.withValues(alpha: 0.2),
                           borderRadius: BorderRadius.circular(8),
                         ),
                         child: Text(
-                          spot.spotType == SpotType.residential
-                              ? 'Residencial (P2P)'
-                              : 'Comercial (B2C)',
-                          style: const TextStyle(
-                              color: AppColors.primaryBlue,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 12),
+                          isMonthly
+                              ? 'VAGA RESIDENCIAL MENSAL'
+                              : 'ROTATIVO / HORISTA',
+                          style: TextStyle(
+                            color: isMonthly
+                                ? AppColors.primaryBlue
+                                : Colors.orange,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 12,
+                          ),
                         ),
                       ),
                       Row(
@@ -120,24 +128,27 @@ class SpotDetailsScreen extends StatelessWidget {
             ),
             const SizedBox(height: 20),
 
-            // Especificações da Vaga
-            const Text(
-              'Informações e Acesso',
-              style: TextStyle(
-                  color: AppColors.textPrimary,
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold),
-            ),
+            // Regras do Condomínio e Termos do Contrato
+            const Text('Regras do Prédio e Termos',
+                style: TextStyle(
+                    color: AppColors.textPrimary,
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold)),
             const SizedBox(height: 12),
             _buildInfoTile(Icons.directions_car_outlined, 'Porte do Veículo',
                 _getVehicleSizeLabel(spot.maxVehicleSize)),
-            _buildInfoTile(Icons.qr_code_2_rounded, 'Método de Acesso',
+            _buildInfoTile(Icons.vpn_key_outlined, 'Acesso ao Prédio',
                 _getAccessMethodLabel(spot.accessMethod)),
+            if (isMonthly)
+              _buildInfoTile(
+                  Icons.history_toggle_off_rounded,
+                  'Permanência Mínima',
+                  '${spot.minContractMonths} mês(es) de contrato'),
             _buildInfoTile(Icons.verified_user_outlined, 'Regras do Condomínio',
                 spot.condominiumRules),
             const SizedBox(height: 24),
 
-            // Preço e Botão de Ação
+            // Card de Preço e Ação
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
@@ -149,24 +160,28 @@ class SpotDetailsScreen extends StatelessWidget {
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text('Valor da hora',
-                          style: TextStyle(
+                      Text(isMonthly ? 'Pacote Mensal' : 'Valor da hora',
+                          style: const TextStyle(
                               color: AppColors.textSecondary, fontSize: 12)),
                       Text(
-                        Formatters.formatCurrency(spot.pricePerHour),
+                        isMonthly
+                            ? '${Formatters.formatCurrency(spot.pricePerMonth!)}/mês'
+                            : Formatters.formatCurrency(spot.pricePerHour ?? 0),
                         style: const TextStyle(
                             color: AppColors.textPrimary,
-                            fontSize: 22,
+                            fontSize: 20,
                             fontWeight: FontWeight.bold),
                       ),
                     ],
                   ),
-                  const SizedBox(width: 20),
+                  const SizedBox(width: 16),
                   Expanded(
                     child: CustomButton(
                       text: isFull
-                          ? 'Ativar Alerta (Waitlist)'
-                          : 'Continuar Reserva',
+                          ? 'Entrar na Espera'
+                          : (isMonthly
+                              ? 'Solicitar Contrato'
+                              : 'Reservar Vaga'),
                       backgroundColor:
                           isFull ? AppColors.statusRed : AppColors.primaryBlue,
                       icon: isFull

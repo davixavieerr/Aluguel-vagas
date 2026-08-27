@@ -11,7 +11,7 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
-  bool _isHostMode = false; // Alterna entre Motorista e Anfitrião
+  bool _isHostMode = false;
 
   @override
   Widget build(BuildContext context) {
@@ -26,7 +26,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
         padding: const EdgeInsets.all(20),
         child: Column(
           children: [
-            // Avatar e Nome
             const Center(
               child: Stack(
                 children: [
@@ -57,8 +56,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
             const Text('davi.amaral@email.com',
                 style: TextStyle(color: AppColors.textSecondary, fontSize: 13)),
             const SizedBox(height: 16),
-
-            // Card de Reputação e Confiança (Trust & Safety)
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
@@ -84,8 +81,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ),
             ),
             const SizedBox(height: 20),
-
-            // Alternância de Modo (Motorista vs Anfitrião)
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
@@ -128,15 +123,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   ),
                   Switch(
                     value: _isHostMode,
-                    activeColor: AppColors.primaryBlue,
+                    activeThumbColor: AppColors.primaryBlue,
                     onChanged: (val) => setState(() => _isHostMode = val),
                   ),
                 ],
               ),
             ),
             const SizedBox(height: 20),
-
-            // Opções da Conta
             _buildSettingsTile(Icons.payment, 'Métodos de Pagamento'),
             _buildSettingsTile(Icons.security, 'Segurança e Documentos'),
             _buildSettingsTile(Icons.help_outline, 'Suporte e Ajuda'),

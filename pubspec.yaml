@@ -12,8 +12,10 @@ dependencies:
   flutter:
     sdk: flutter
 
+  geocoding: ^3.0.0
   google_maps_flutter: ^2.6.0
   cupertino_icons: ^1.0.8
+  http: ^1.2.0
 
 # 3. Dependências de desenvolvimento e testes
 dev_dependencies:
