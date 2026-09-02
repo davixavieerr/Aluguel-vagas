@@ -59,7 +59,7 @@ class SupportScreen extends StatelessWidget {
             context,
             icon: Icons.email_rounded,
             title: 'E-mail',
-            subtitle: 'suporte@parkingapp.com.br',
+            subtitle: 'suporte@estacionei.com.br',
             color: AppColors.primaryBlue,
           ),
           const SizedBox(height: 24),

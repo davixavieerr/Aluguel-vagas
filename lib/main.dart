@@ -13,7 +13,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Parking App',
+      title: 'Estaconei',
       debugShowCheckedModeBanner: false,
       theme: ThemeData.dark().copyWith(
         scaffoldBackgroundColor: const Color(0xFF121418),

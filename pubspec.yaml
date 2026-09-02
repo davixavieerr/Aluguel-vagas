@@ -1,5 +1,5 @@
-name: flutter_application_1
-description: "A new Flutter project."
+name: estacionei
+description: "Plataforma de aluguel de vagas em condomínios e estacionamentos."
 publish_to: 'none'
 version: 1.0.0+1
 
@@ -10,6 +10,7 @@ environment:
 # 2. Dependências do aplicativo
 dependencies:
   flutter:
+  uses-material-design: true
     sdk: flutter
 
   geocoding: ^3.0.0
@@ -22,6 +23,16 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^3.0.0
+  flutter_launcher_icons: ^0.13.1
 
 flutter:
   uses-material-design: true
+
+flutter_launcher_icons:
+  android: "launcher_icon"
+  ios: true
+  image_path: "assets/icon/app_icon.png"
+  min_sdk_android: 21
+
+assets:
+    - assets/images/

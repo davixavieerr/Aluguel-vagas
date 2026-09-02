@@ -1,3 +1,5 @@
+// Caminho: lib/features/map/presentation/widgets/map_search_bar.dart
+
 import 'package:flutter/material.dart';
 import '../../../../core/theme/app_colors.dart';
 
@@ -12,15 +14,15 @@ class MapSearchBar extends StatelessWidget {
     this.onTap,
     this.onFilterTap,
     this.onChanged,
-    this.hintText = 'Onde você deseja estacionar?',
+    this.hintText = 'Onde quer estacionar?',
   });
 
   @override
   Widget build(BuildContext context) {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      padding: const EdgeInsets.symmetric(horizontal: 16),
-      height: 52,
+      padding: const EdgeInsets.symmetric(horizontal: 14),
+      height: 54,
       decoration: BoxDecoration(
         color: AppColors.cardSurface.withValues(alpha: 0.95),
         borderRadius: BorderRadius.circular(16),
@@ -34,8 +36,19 @@ class MapSearchBar extends StatelessWidget {
       ),
       child: Row(
         children: [
-          const Icon(Icons.search, color: AppColors.textSecondary),
+          // 1. Sua Logo do Estacionei em JPG:
+          ClipRRect(
+            borderRadius: BorderRadius.circular(8),
+            child: Image.asset(
+              'assets/images/logo_estacionei.jpg',
+              height: 32,
+              width: 32,
+              fit: BoxFit.cover,
+            ),
+          ),
           const SizedBox(width: 12),
+
+          // 2. Campo de busca
           Expanded(
             child: GestureDetector(
               onTap: onTap,
@@ -43,17 +56,19 @@ class MapSearchBar extends StatelessWidget {
                 hintText,
                 style: const TextStyle(
                   color: AppColors.textSecondary,
-                  fontSize: 15,
+                  fontSize: 14,
                 ),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
               ),
             ),
           ),
+
+          // 3. Botão de filtros
           IconButton(
             icon: const Icon(Icons.tune, color: AppColors.primaryBlue),
             onPressed: onFilterTap,
-            tooltip: 'Filtros Avançados',
+            tooltip: 'Filtros',
             splashRadius: 20,
           ),
         ],
