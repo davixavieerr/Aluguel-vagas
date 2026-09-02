@@ -1,4 +1,4 @@
-# 🚗 Parking App — Plataforma P2P & B2C de Locação de Vagas
+# 🚗 Estacionei App — Plataforma P2P & B2C de Locação de Vagas
 
 > Aplicativo mobile em **Flutter** para aluguel de vagas de garagem ociosas em condomínios residenciais (**P2P**) e estacionamentos rotativos (**B2C**), com foco inicial na região da **Avenida Paulista e Paraíso (São Paulo - SP)**.
 
@@ -139,8 +139,8 @@ lib/
 
 1. **Clone o repositório:**
 ```bash
-git clone https://github.com/seu-usuario/parking_app.git
-cd parking_app
+https://github.com/davixavieerr/Estacionei-App.git
+cd Estacionei-App
 ```
 
 2. **Instale as dependências:**
@@ -185,5 +185,6 @@ flutter run
 | :--- | :--- |
 | **Gabriel Simioni** | Construção da seção de Perfil (telas de Métodos de Pagamento, Segurança e Documentos, Suporte e Ajuda) e documentação do README |
 | **Davi** | Desenvolvedor do sistema — arquitetura do app e conexão com API |
+| **Felipe Ramalho** | Desenvolvedor de interface Web | 
 
 
