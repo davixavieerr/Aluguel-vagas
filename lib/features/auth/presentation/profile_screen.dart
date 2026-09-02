@@ -2,6 +2,9 @@
 
 import 'package:flutter/material.dart';
 import '../../../core/theme/app_colors.dart';
+import 'payment_methods_screen.dart';
+import 'security_documents_screen.dart';
+import 'support_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -130,13 +133,83 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ),
             ),
             const SizedBox(height: 20),
-            _buildSettingsTile(Icons.payment, 'Métodos de Pagamento'),
-            _buildSettingsTile(Icons.security, 'Segurança e Documentos'),
-            _buildSettingsTile(Icons.help_outline, 'Suporte e Ajuda'),
-            _buildSettingsTile(Icons.logout, 'Sair da Conta',
-                isDestructive: true),
+            _buildSettingsTile(
+              Icons.payment,
+              'Métodos de Pagamento',
+              onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (_) => const PaymentMethodsScreen()),
+              ),
+            ),
+            _buildSettingsTile(
+              Icons.security,
+              'Segurança e Documentos',
+              onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (_) => const SecurityDocumentsScreen()),
+              ),
+            ),
+            _buildSettingsTile(
+              Icons.help_outline,
+              'Suporte e Ajuda',
+              onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const SupportScreen()),
+              ),
+            ),
+            _buildSettingsTile(
+              Icons.logout,
+              'Sair da Conta',
+              isDestructive: true,
+              onTap: () => _confirmLogout(context),
+            ),
           ],
         ),
+      ),
+    );
+  }
+
+  void _confirmLogout(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        backgroundColor: AppColors.cardSurface,
+        title: const Text('Sair da conta',
+            style: TextStyle(color: AppColors.textPrimary)),
+        content: const Text(
+          'Você precisará entrar novamente para reservar ou anunciar vagas. Deseja continuar?',
+          style: TextStyle(color: AppColors.textSecondary),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(),
+            child: const Text('Cancelar',
+                style: TextStyle(color: AppColors.textSecondary)),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.of(dialogContext).pop(); // fecha o diálogo
+
+              // TODO: chamar aqui a lógica real de logout, por exemplo:
+              //   await AuthRepository.instance.logout();
+              // e navegar até a tela de login substituindo toda a pilha:
+              //   Navigator.of(context).pushAndRemoveUntil(
+              //     MaterialPageRoute(builder: (_) => const LoginScreen()),
+              //     (route) => false,
+              //   );
+              // Como o projeto ainda não tem tela de login, por enquanto só
+              // fechamos o diálogo e avisamos o usuário.
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Sessão encerrada.')),
+              );
+            },
+            child: const Text('Sair',
+                style: TextStyle(
+                    color: AppColors.statusRed, fontWeight: FontWeight.bold)),
+          ),
+        ],
       ),
     );
   }
@@ -164,8 +237,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  Widget _buildSettingsTile(IconData icon, String title,
-      {bool isDestructive = false}) {
+  Widget _buildSettingsTile(
+    IconData icon,
+    String title, {
+    bool isDestructive = false,
+    required VoidCallback onTap,
+  }) {
     return Container(
       margin: const EdgeInsets.only(bottom: 8),
       decoration: BoxDecoration(
@@ -183,7 +260,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 fontSize: 14)),
         trailing: const Icon(Icons.arrow_forward_ios,
             color: AppColors.textSecondary, size: 14),
-        onTap: () {},
+        onTap: onTap,
       ),
     );
   }

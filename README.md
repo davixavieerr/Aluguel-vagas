@@ -15,6 +15,11 @@ O **Parking App** resolve essa dor conectando moradores a locatários através d
 ## ✨ Funcionalidades Implementadas
 
 ### 🗺️ 1. Mapa Interativo & Status de Vagas (Estilo Uber / Airbnb)
+
+<p align="center">
+  <img src="images/Readme_1.png" alt="Mapa interativo com pins de vagas na Av. Paulista" width="70%"/>
+</p>
+
 - **Tema Escuro Moderno (*Dark Map*):** Estilização customizada em JSON destacando o traçado urbano e os marcadores de vagas.
 - **Semáforo de Disponibilidade:**
   - 🟢 **Verde:** Vaga disponível / Contrato mensal livre.
@@ -46,6 +51,11 @@ O **Parking App** resolve essa dor conectando moradores a locatários através d
 - Mensageria instantânea para troca de instruções de portaria, placas de veículos e entrega de controle remoto.
 
 ### 👤 7. Perfil de Usuário & Confiança (*Trust & Safety*)
+
+<p align="center">
+  <img src="images/Readme_2.png" alt="Tela de perfil do usuário com avaliação e verificação" width="45%"/>
+</p>
+
 - Avaliação mútua com estrelas e histórico de locações.
 - Selo de verificação de identidade / CNH.
 - Alternância rápida entre **Modo Motorista (Locatário)** e **Modo Anfitrião (Locador)**.
@@ -105,3 +115,75 @@ lib/
 │   └── widgets/
 │       └── custom_button.dart       # Botão padrão reutilizável
 └── main.dart                        # Ponto de entrada do aplicativo
+```
+
+---
+
+## 🛠️ Stack Tecnológica
+
+- **Framework:** Flutter (Dart 3)
+- **Mapas e Geolocalização:** `google_maps_flutter`
+- **Requisições e Geocodificação:** `http`
+- **Ícones e Design:** `cupertino_icons` & `Material Icons`
+- **Gerenciamento de Estado:** `ChangeNotifier` / `ListenableBuilder` *(com arquitetura pronta para migração para Riverpod/Bloc)*
+
+---
+
+## 🚀 Como Executar o Projeto
+
+### Pré-requisitos
+- Flutter SDK instalado (versão >= 3.0.0)
+- Dispositivo Android (Emulador ou Físico), Simulador iOS ou Navegador Chrome/Edge
+
+### Instalação
+
+1. **Clone o repositório:**
+```bash
+git clone https://github.com/seu-usuario/parking_app.git
+cd parking_app
+```
+
+2. **Instale as dependências:**
+```bash
+flutter pub get
+```
+
+3. **Configure a Google Maps API Key:**
+- **Android:** Insira sua chave no arquivo `android/app/src/main/AndroidManifest.xml`:
+```xml
+<meta-data 
+    android:name="com.google.android.geo.API_KEY"
+    android:value="SUA_CHAVE_API_AQUI"/>
+```
+- **Web:** Insira o script no `<head>` do arquivo `web/index.html`:
+```html
+<script src="https://maps.googleapis.com/maps/api/js?key=SUA_CHAVE_API_AQUI"></script>
+```
+
+4. **Execute a aplicação:**
+```bash
+flutter run
+```
+
+---
+
+## 🗺️ Prédios e Vagas Mockadas para Teste (Região da Paulista)
+
+| Edifício / Estacionamento | Endereço | Modalidade | Valor | Status |
+| :--- | :--- | :--- | :--- | :--- |
+| **Edifício Barão de Capanema** | Al. Santos, 1893 | Contrato Mensal (P2P) | R$ 420,00/mês | 🟢 Livre |
+| **Edifício Residencial Anchieta** | Av. Paulista, 2584 | Contrato Mensal (P2P) | R$ 380,00/mês | 🟢 Livre |
+| **Estacionamento Top Center** | Av. Paulista, 854 | Mensal / Rotativo (B2C) | R$ 22,00/h ou R$ 650/mês | 🟢 3 vagas |
+| **Condomínio Parque Paulista** | Rua Cincinato Braga, 450 | Contrato Mensal (P2P) | R$ 350,00/mês | 🔴 Lotado (Waitlist) |
+| **Edifício Paulista Tower** | Al. Santos, 1470 | Rotativo (P2P) | R$ 14,00/h | - |
+
+---
+
+## 👥 Equipe
+
+| Integrante | Responsabilidade |
+| :--- | :--- |
+| **Gabriel Simioni** | Construção da seção de Perfil (telas de Métodos de Pagamento, Segurança e Documentos, Suporte e Ajuda) e documentação do README |
+| **Davi** | Desenvolvedor do sistema — arquitetura do app e conexão com API |
+
+
