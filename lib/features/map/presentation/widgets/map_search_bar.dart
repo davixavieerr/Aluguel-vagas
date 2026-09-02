@@ -36,7 +36,7 @@ class MapSearchBar extends StatelessWidget {
       ),
       child: Row(
         children: [
-          // 1. Sua Logo do Estacionei em JPG:
+          // Logo com fallback seguro contra erros de carregamento
           ClipRRect(
             borderRadius: BorderRadius.circular(8),
             child: Image.asset(
@@ -44,11 +44,20 @@ class MapSearchBar extends StatelessWidget {
               height: 32,
               width: 32,
               fit: BoxFit.cover,
+              errorBuilder: (context, error, stackTrace) {
+                // Se a imagem não for encontrada, exibe este ícone sem travar o app:
+                return Container(
+                  height: 32,
+                  width: 32,
+                  color: AppColors.primaryBlue,
+                  child: const Icon(Icons.local_parking_rounded,
+                      color: Colors.white, size: 20),
+                );
+              },
             ),
           ),
           const SizedBox(width: 12),
 
-          // 2. Campo de busca
           Expanded(
             child: GestureDetector(
               onTap: onTap,
@@ -64,7 +73,6 @@ class MapSearchBar extends StatelessWidget {
             ),
           ),
 
-          // 3. Botão de filtros
           IconButton(
             icon: const Icon(Icons.tune, color: AppColors.primaryBlue),
             onPressed: onFilterTap,
