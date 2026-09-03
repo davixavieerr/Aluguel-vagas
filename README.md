@@ -179,19 +179,7 @@ cd Estacionei-App
 flutter pub get
 ```
 
-3. **Configure a Google Maps API Key:**
-- **Android:** Insira sua chave no arquivo `android/app/src/main/AndroidManifest.xml`:
-```xml
-<meta-data 
-    android:name="com.google.android.geo.API_KEY"
-    android:value="SUA_CHAVE_API_AQUI"/>
-```
-- **Web:** Insira o script no `<head>` do arquivo `web/index.html`:
-```html
-<script src="https://maps.googleapis.com/maps/api/js?key=SUA_CHAVE_API_AQUI"></script>
-```
-
-4. **Execute a aplicação:**
+3. **Execute a aplicação:**
 ```bash
 flutter run
 ```
