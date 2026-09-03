@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="logo.png" alt="Logo Estacionei" width="500"/>
+<img src="assets/images/logo.png" alt="Logo Estacionei" width="500"/>
 
 # 🚗 Estacionei App — Plataforma P2P & B2C de Locação de Vagas
 
